@@ -11,10 +11,17 @@ import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class VehicleDetailView extends VBox {
 
     private final Stage stage;
     private final VehicleDto vehicle;
+
+    private static final Logger LOGGER =
+            Logger.getLogger(VehicleDetailView.class.getName());
+
 
     public VehicleDetailView(Stage stage, VehicleDto vehicle) {
         this.stage = stage;
@@ -77,7 +84,7 @@ public class VehicleDetailView extends VBox {
                     fuelList.getItems().add(dto);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.log(Level.SEVERE, "Vehicle loading error", e);
                 fuelList.setPlaceholder(new Label("No fuel records"));
             }
         };
@@ -107,7 +114,7 @@ public class VehicleDetailView extends VBox {
                         );
                         loadFuel.run();
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        LOGGER.log(Level.SEVERE, "Vehicle loading error", ex);
                     }
                 }
             });
