@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop   # 🔥 kritik
+    show-sql: false
+    database-platform: org.hibernate.dialect.H2Dialect
+
+  flyway:
+    enabled: false           # 🔥 EN ÖNEMLİ SATIR
+
+app:
+  jwt:
+    secret: TEST_SECRET_KEY_SHOULD_BE_AT_LEAST_32_CHARS_LONG
+    expiration-minutes: 60
