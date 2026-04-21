@@ -165,7 +165,7 @@ public class VehicleDetailView extends VBox {
         box.setPadding(new Insets(10));
 
         ComboBox<String> periodBox = new ComboBox<>();
-        periodBox.getItems().addAll("2026-01", "2026-02", "2026-03");
+        periodBox.getItems().addAll("2026-01", "2026-02", "2026-03", "2026-04", "2026-05");
         periodBox.getSelectionModel().selectFirst();
 
         Label kmLabel = new Label();
