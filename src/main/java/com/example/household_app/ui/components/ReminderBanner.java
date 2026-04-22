@@ -101,7 +101,7 @@ public class ReminderBanner extends HBox {
                     vehicleLabel + " - ITV expires " + daysText +
                             " (" + remindAt + ")";
             case "INSURANCE" ->
-                    vehicleLabel + " - insurance expires " + daysText +
+                    vehicleLabel + " - Insurance expires " + daysText +
                             " (" + remindAt + ")";
             case "MAINTENANCE" ->
                     vehicleLabel + " - Maintenance " + daysText;

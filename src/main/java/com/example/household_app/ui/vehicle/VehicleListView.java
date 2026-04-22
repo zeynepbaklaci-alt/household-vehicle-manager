@@ -29,6 +29,11 @@ public class VehicleListView extends VBox {
 
         /* ===== TITLE ===== */
         Label title = new Label("Vehicles");
+        title.setStyle("""
+                    -fx-font-size: 18px;
+                    -fx-font-weight: bold;
+                """);
+
 
         /* ===== BUTTONS ===== */
         Button addBtn = new Button("➕ Add Vehicle");

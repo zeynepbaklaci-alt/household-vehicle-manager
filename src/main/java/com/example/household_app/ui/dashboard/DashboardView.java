@@ -46,7 +46,7 @@ public class DashboardView extends VBox {
             JSONArray arr = ApiClient.getCachedReminders();
 
             if (arr.isEmpty()) {
-                Label empty = new Label("No hay avisos pendientes");
+                Label empty = new Label("No pending notifications");
                 empty.setStyle("-fx-text-fill: gray;");
                 getChildren().add(empty);
                 return;
