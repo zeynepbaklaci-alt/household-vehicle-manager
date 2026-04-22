@@ -4,6 +4,8 @@ import com.example.household_app.reminder.dto.ReminderResponseDTO;
 import com.example.household_app.vehicle.Vehicle;
 import com.example.household_app.vehicle.VehicleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -18,7 +20,9 @@ public class ReminderController {
 
     private final ReminderRepository reminderRepository;
     private final VehicleService vehicleService;
+    private final ReminderService reminderService;
 
+    @Transactional(readOnly = true)
     @GetMapping("/dashboard")
     public List<ReminderResponseDTO> dashboardReminders() {
 
@@ -82,6 +86,13 @@ public class ReminderController {
         });
 
         reminderRepository.saveAll(reminders);
+    }
+
+
+    @PostMapping("/dashboard/dismiss-all")
+    public ResponseEntity<Void> dismissAllDashboardReminders() {
+        reminderService.dismissAllPendingReminders();
+        return ResponseEntity.noContent().build();
     }
 
 

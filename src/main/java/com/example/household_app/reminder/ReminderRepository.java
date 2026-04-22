@@ -2,6 +2,9 @@ package com.example.household_app.reminder;
 
 import com.example.household_app.vehicle.Vehicle;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -10,7 +13,18 @@ import java.util.UUID;
 
 public interface ReminderRepository extends JpaRepository<Reminder, UUID> {
 
-    boolean existsByVehicleAndTypeAndRemindAt(
+
+    @Modifying
+    @Query("""
+        update Reminder r
+        set r.sent = true
+        where r.sent = false
+          and r.remindAt <= :today
+    """)
+    void markAllPendingAsSent(@Param("today") LocalDate today);
+
+
+boolean existsByVehicleAndTypeAndRemindAt(
             Vehicle vehicle,
             ReminderType type,
             LocalDate remindAt
