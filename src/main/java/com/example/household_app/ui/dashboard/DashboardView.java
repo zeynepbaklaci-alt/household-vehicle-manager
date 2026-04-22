@@ -27,7 +27,7 @@ public class DashboardView extends VBox {
         getChildren().clear();
 
         /* ===== HEADER (TITLE + DISMISS ALL) ===== */
-        Label title = new Label("🔔 Recordatorios");
+        Label title = new Label("🔔 Reminders");
         title.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
         Button dismissAllBtn = new Button("🔕 Dismiss all");
@@ -67,7 +67,7 @@ public class DashboardView extends VBox {
             }
 
         } catch (Exception e) {
-            Label error = new Label("⚠️ Error cargando recordatorios");
+            Label error = new Label("⚠️ Error loading reminders");
             error.setStyle("-fx-text-fill: red;");
             getChildren().add(error);
             e.printStackTrace();
