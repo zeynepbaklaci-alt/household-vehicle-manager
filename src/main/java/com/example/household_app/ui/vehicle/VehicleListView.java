@@ -1,5 +1,6 @@
 package com.example.household_app.ui.vehicle;
 
+import com.example.household_app.ui.dashboard.DashboardView;
 import com.example.household_app.ui.session.SessionStore;
 import com.example.household_app.ui.util.ApiClient;
 import javafx.geometry.Insets;
@@ -20,8 +21,12 @@ public class VehicleListView extends VBox {
         this.stage = stage;
 
         setPadding(new Insets(20));
-        setSpacing(10);
+        setSpacing(15);
 
+        /*  DASHBOARD (REMINDERS)  */
+        getChildren().add(new DashboardView());
+
+        /* ===== TITLE ===== */
         Label title = new Label("Vehicles");
 
         /* ===== BUTTONS ===== */
@@ -69,14 +74,12 @@ public class VehicleListView extends VBox {
             alert.showAndWait().ifPresent(result -> {
                 if (result == ButtonType.OK) {
                     try {
-
                         ApiClient.delete(
                                 "/households/" +
                                         SessionStore.getHouseholdId() +
                                         "/vehicles/" +
                                         selected.getId()
-                        )
-                        ;
+                        );
                         loadVehicles();
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -111,7 +114,7 @@ public class VehicleListView extends VBox {
             }
         });
 
-        /* ===== DOUBLE CLICK → DETAIL (READ-ONLY) ===== */
+        /* ===== DOUBLE CLICK → DETAIL ===== */
         listView.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
                 VehicleDto selected =
@@ -130,10 +133,11 @@ public class VehicleListView extends VBox {
 
         loadVehicles();
 
+        /* ===== ADD UI ELEMENTS ===== */
         getChildren().addAll(title, buttons, listView);
     }
 
-    // 🔁 Load / Reload vehicles
+    /*  Load / Reload vehicles */
     private void loadVehicles() {
         listView.getItems().clear();
 
@@ -161,7 +165,6 @@ public class VehicleListView extends VBox {
                 dto.setModel(v.getString("model"));
                 dto.setFuelType(v.getString("fuelType"));
                 dto.setInitialOdometer(v.getInt("initialOdometer"));
-
 
                 listView.getItems().add(dto);
             }
