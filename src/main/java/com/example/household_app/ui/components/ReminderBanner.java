@@ -6,8 +6,12 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import com.example.household_app.ui.util.ApiClient;
 
+import java.time.temporal.ChronoUnit;
+
 import java.time.LocalDate;
 import java.util.UUID;
+
+import static javax.swing.UIManager.getColor;
 
 public class ReminderBanner extends HBox {
 
@@ -26,10 +30,20 @@ public class ReminderBanner extends HBox {
         setSpacing(12);
         setPadding(new Insets(10));
         setStyle("""
-            -fx-border-color: lightgray;
-            -fx-border-radius: 6;
-            -fx-background-radius: 6;
-        """);
+                    -fx-border-color: lightgray;
+                    -fx-border-radius: 6;
+                    -fx-background-radius: 6;
+                """);
+
+        long daysLeft = ChronoUnit.DAYS.between(LocalDate.now(), remindAt);
+
+        setStyle("""
+                    -fx-border-radius: 6;
+                    -fx-background-radius: 6;
+                    -fx-padding: 10;
+                    -fx-background-color: %s;
+                """.formatted(getColor(daysLeft)));
+
 
         // Icon
         Label iconLabel = new Label(getIcon(type));
@@ -42,9 +56,9 @@ public class ReminderBanner extends HBox {
         // Dismiss button
         Button dismissButton = new Button("✖");
         dismissButton.setStyle("""
-            -fx-background-color: transparent;
-            -fx-font-size: 14px;
-        """);
+                    -fx-background-color: transparent;
+                    -fx-font-size: 14px;
+                """);
 
         dismissButton.setOnAction(e -> {
             ApiClient.dismissReminder(reminderId);
@@ -68,16 +82,37 @@ public class ReminderBanner extends HBox {
             String vehicleLabel,
             LocalDate remindAt
     ) {
+        long daysLeft =
+                ChronoUnit.DAYS.between(LocalDate.now(), remindAt);
+
+        String daysText =
+                daysLeft == 1
+                        ? "mañana"
+                        : "en " + daysLeft + " días";
+
         return switch (type) {
             case "ITV" ->
-                    vehicleLabel + " - ITV vence el " + remindAt;
+                    vehicleLabel + " - ITV vence " + daysText +
+                            " (" + remindAt + ")";
             case "INSURANCE" ->
-                    vehicleLabel + " - Seguro vence el " + remindAt;
+                    vehicleLabel + " - Seguro vence " + daysText +
+                            " (" + remindAt + ")";
             case "MAINTENANCE" ->
-                    vehicleLabel + " - Mantenimiento pendiente el " + remindAt;
+                    vehicleLabel + " - Mantenimiento " + daysText;
             default ->
                     vehicleLabel;
         };
     }
+
+    private String getColor(long daysLeft) {
+        if (daysLeft <= 7) {
+            return "#ffcccc"; // kırmızı
+        } else if (daysLeft <= 30) {
+            return "#fff0cc"; // turuncu
+        } else {
+            return "#e6ffec"; // yeşil
+        }
+    }
+
 }
 

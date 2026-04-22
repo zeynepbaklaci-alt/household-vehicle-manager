@@ -6,6 +6,7 @@ import com.example.household_app.ui.vehicle.fuel.FuelDto;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.json.JSONArray;
@@ -22,7 +23,6 @@ public class VehicleDetailView extends VBox {
     private static final Logger LOGGER =
             Logger.getLogger(VehicleDetailView.class.getName());
 
-
     public VehicleDetailView(Stage stage, VehicleDto vehicle) {
         this.stage = stage;
         this.vehicle = vehicle;
@@ -30,8 +30,23 @@ public class VehicleDetailView extends VBox {
         setPadding(new Insets(20));
         setSpacing(10);
 
+        /* ===== HEADER (TITLE + REMINDER BADGE) ===== */
         Label title = new Label("Vehicle Detail");
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        Label reminderBadge = new Label();
+        reminderBadge.setStyle("""
+            -fx-background-color: #ff4444;
+            -fx-text-fill: white;
+            -fx-padding: 4 8;
+            -fx-background-radius: 10;
+        """);
+        reminderBadge.setVisible(false);
+
+        HBox headerBox = new HBox(10, title, reminderBadge);
+        headerBox.setPadding(new Insets(0, 0, 10, 0));
+
+        loadReminderBadge(vehicle.getId(), reminderBadge);
 
         /* ===== DETAILS TAB ===== */
         VBox detailsBox = new VBox(8);
@@ -39,12 +54,13 @@ public class VehicleDetailView extends VBox {
                 new Label("Plate: " + vehicle.getPlate()),
                 new Label("Brand: " + vehicle.getBrand()),
                 new Label("Model: " + vehicle.getModel())
-
         );
 
         Button backBtn = new Button("← Back");
         backBtn.setOnAction(e ->
-                stage.setScene(new Scene(new VehicleListView(stage), 600, 400))
+                stage.setScene(
+                        new Scene(new VehicleListView(stage), 600, 400)
+                )
         );
         detailsBox.getChildren().add(backBtn);
 
@@ -60,7 +76,6 @@ public class VehicleDetailView extends VBox {
         deleteFuelBtn.setStyle("-fx-text-fill: red;");
 
         fuelBox.getChildren().addAll(addFuelBtn, deleteFuelBtn, fuelList);
-
 
         Runnable loadFuel = () -> {
             fuelList.getItems().clear();
@@ -84,14 +99,17 @@ public class VehicleDetailView extends VBox {
                     fuelList.getItems().add(dto);
                 }
             } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Vehicle loading error", e);
+                LOGGER.log(Level.SEVERE, "Fuel loading error", e);
                 fuelList.setPlaceholder(new Label("No fuel records"));
             }
         };
 
-
         addFuelBtn.setOnAction(e ->
-                AddFuelFillView.showCreate(stage, vehicle.getId(), loadFuel)
+                AddFuelFillView.showCreate(
+                        stage,
+                        vehicle.getId(),
+                        loadFuel
+                )
         );
 
         deleteFuelBtn.setOnAction(e -> {
@@ -114,7 +132,7 @@ public class VehicleDetailView extends VBox {
                         );
                         loadFuel.run();
                     } catch (Exception ex) {
-                        LOGGER.log(Level.SEVERE, "Vehicle loading error", ex);
+                        LOGGER.log(Level.SEVERE, "Fuel delete error", ex);
                     }
                 }
             });
@@ -136,7 +154,6 @@ public class VehicleDetailView extends VBox {
             }
         });
 
-        // DOUBLE CLICK → EDIT FUEL
         fuelList.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) {
                 FuelDto selected = fuelList.getSelectionModel().getSelectedItem();
@@ -162,7 +179,8 @@ public class VehicleDetailView extends VBox {
 
         /* ===== TAB PANE ===== */
         TabPane tabs = new TabPane(detailsTab, fuelTab, reportsTab);
-        getChildren().addAll(title, tabs);
+
+        getChildren().addAll(headerBox, tabs);
     }
 
     /* ===== REPORT TAB CONTENT ===== */
@@ -172,7 +190,9 @@ public class VehicleDetailView extends VBox {
         box.setPadding(new Insets(10));
 
         ComboBox<String> periodBox = new ComboBox<>();
-        periodBox.getItems().addAll("2026-01", "2026-02", "2026-03", "2026-04", "2026-05");
+        periodBox.getItems().addAll(
+                "2026-01", "2026-02", "2026-03", "2026-04", "2026-05"
+        );
         periodBox.getSelectionModel().selectFirst();
 
         Label kmLabel = new Label();
@@ -192,13 +212,21 @@ public class VehicleDetailView extends VBox {
                 JSONObject o = new JSONObject(resp);
 
                 kmLabel.setText("Km driven: " + o.getInt("kmDriven"));
-                totalLabel.setText("Total cost: " +
-                        String.format("%.2f €", o.getDouble("totalCost")));
-                costKmLabel.setText("Cost / km: " +
-                        String.format("%.3f €", o.getDouble("costPerKm")));
-                consumptionLabel.setText("Avg consumption: " +
-                        String.format("%.2f L/100km",
-                                o.getDouble("avgConsumption")));
+                totalLabel.setText(
+                        "Total cost: " +
+                                String.format("%.2f €", o.getDouble("totalCost"))
+                );
+                costKmLabel.setText(
+                        "Cost / km: " +
+                                String.format("%.3f €", o.getDouble("costPerKm"))
+                );
+                consumptionLabel.setText(
+                        "Avg consumption: " +
+                                String.format(
+                                        "%.2f L/100km",
+                                        o.getDouble("avgConsumption")
+                                )
+                );
 
             } catch (Exception e) {
                 kmLabel.setText("No data");
@@ -221,5 +249,34 @@ public class VehicleDetailView extends VBox {
         );
 
         return box;
+    }
+
+    /* ===== REMINDER BADGE LOADER ===== */
+    private void loadReminderBadge(
+            String vehicleId,
+            Label badge
+    ) {
+        try {
+            String response = ApiClient.get("/reminders/dashboard");
+            JSONArray arr = new JSONArray(response);
+
+            long count = 0;
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject r = arr.getJSONObject(i);
+                if (vehicleId.equals(r.getString("vehicleId"))) {
+                    count++;
+                }
+            }
+
+            if (count > 0) {
+                badge.setText("🔔 " + count);
+                badge.setVisible(true);
+            } else {
+                badge.setVisible(false);
+            }
+
+        } catch (Exception e) {
+            badge.setVisible(false);
+        }
     }
 }
