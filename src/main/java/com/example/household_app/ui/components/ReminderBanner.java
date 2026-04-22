@@ -83,22 +83,28 @@ public class ReminderBanner extends HBox {
             LocalDate remindAt
     ) {
         long daysLeft =
-                ChronoUnit.DAYS.between(LocalDate.now(), remindAt);
+                java.time.temporal.ChronoUnit.DAYS
+                        .between(LocalDate.now(), remindAt);
 
-        String daysText =
-                daysLeft == 1
-                        ? "mañana"
-                        : "en " + daysLeft + " días";
+        String daysText;
+
+        if (daysLeft == 0) {
+            daysText = "today";
+        } else if (daysLeft == 1) {
+            daysText = "tomorrow";
+        } else {
+            daysText = "in " + daysLeft + " days";
+        }
 
         return switch (type) {
             case "ITV" ->
-                    vehicleLabel + " - ITV vence " + daysText +
+                    vehicleLabel + " - ITV expires " + daysText +
                             " (" + remindAt + ")";
             case "INSURANCE" ->
-                    vehicleLabel + " - Seguro vence " + daysText +
+                    vehicleLabel + " - insurance expires " + daysText +
                             " (" + remindAt + ")";
             case "MAINTENANCE" ->
-                    vehicleLabel + " - Mantenimiento " + daysText;
+                    vehicleLabel + " - Maintenance " + daysText;
             default ->
                     vehicleLabel;
         };
@@ -106,11 +112,11 @@ public class ReminderBanner extends HBox {
 
     private String getColor(long daysLeft) {
         if (daysLeft <= 7) {
-            return "#ffcccc"; // kırmızı
+            return "#ffcccc"; // red
         } else if (daysLeft <= 30) {
-            return "#fff0cc"; // turuncu
+            return "#fff0cc"; // orange
         } else {
-            return "#e6ffec"; // yeşil
+            return "#e6ffec"; // green
         }
     }
 
