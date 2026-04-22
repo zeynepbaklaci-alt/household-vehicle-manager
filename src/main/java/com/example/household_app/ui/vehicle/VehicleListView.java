@@ -3,6 +3,7 @@ package com.example.household_app.ui.vehicle;
 import com.example.household_app.ui.dashboard.DashboardView;
 import com.example.household_app.ui.session.SessionStore;
 import com.example.household_app.ui.util.ApiClient;
+import javafx.scene.layout.Priority;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -99,20 +100,46 @@ public class VehicleListView extends VBox {
 
         /* ===== LIST VIEW ===== */
         listView.setCellFactory(lv -> new ListCell<>() {
+
+            private final Label textLabel = new Label();
+            private final Label badge = new Label();
+            private final HBox container = new HBox(10);
+
+            {
+                badge.setStyle("""
+                            -fx-background-color: #ff4444;
+                            -fx-text-fill: white;
+                            -fx-padding: 2 8;
+                            -fx-background-radius: 10;
+                            -fx-font-size: 11px;
+                        """);
+                badge.setVisible(false);
+
+                HBox.setHgrow(textLabel, Priority.ALWAYS);
+                container.getChildren().addAll(textLabel, badge);
+            }
+
             @Override
             protected void updateItem(VehicleDto item, boolean empty) {
                 super.updateItem(item, empty);
+
                 if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(
-                            item.getBrand() + " " +
-                                    item.getModel() +
-                                    " (" + item.getPlate() + ")"
-                    );
+                    setGraphic(null);
+                    return;
                 }
+
+                textLabel.setText(
+                        item.getBrand() + " " +
+                                item.getModel() +
+                                " (" + item.getPlate() + ")"
+                );
+
+                loadReminderCount(item.getId(), badge);
+
+                setGraphic(container);
             }
         });
+
 
         /* ===== DOUBLE CLICK → DETAIL ===== */
         listView.setOnMouseClicked(event -> {
@@ -172,6 +199,34 @@ public class VehicleListView extends VBox {
         } catch (Exception e) {
             e.printStackTrace();
             listView.setPlaceholder(new Label("Error loading vehicles"));
+        }
+    }
+
+    private void loadReminderCount(
+            String vehicleId,
+            Label badge
+    ) {
+        try {
+            String response = ApiClient.get("/reminders/dashboard");
+            JSONArray arr = new JSONArray(response);
+
+            long count = 0;
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject r = arr.getJSONObject(i);
+                if (vehicleId.equals(r.getString("vehicleId"))) {
+                    count++;
+                }
+            }
+
+            if (count > 0) {
+                badge.setText("🔔 " + count);
+                badge.setVisible(true);
+            } else {
+                badge.setVisible(false);
+            }
+
+        } catch (Exception e) {
+            badge.setVisible(false);
         }
     }
 }
