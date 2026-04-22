@@ -130,5 +130,13 @@ public final class ApiClient {
         }
     }
 
+    public static void dismissAllReminders() {
+        try {
+            post("/reminders/dismiss-all", "");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to dismiss all reminders", e);
+        }
+    }
+
 
 }

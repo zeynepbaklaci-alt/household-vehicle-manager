@@ -47,4 +47,21 @@ public class ReminderController {
         reminderRepository.save(reminder);
     }
 
+    @PostMapping("/dismiss-all")
+    public void dismissAll() {
+
+        List<Reminder> reminders =
+                reminderRepository.findBySentFalseAndRemindAtLessThanEqual(
+                        LocalDate.now()
+                );
+
+        reminders.forEach(r -> {
+            r.setSent(true);
+            r.setSentAt(LocalDateTime.now());
+        });
+
+        reminderRepository.saveAll(reminders);
+    }
+
+
 }

@@ -3,12 +3,16 @@ package com.example.household_app.ui.dashboard;
 import com.example.household_app.ui.components.ReminderBanner;
 import com.example.household_app.ui.util.ApiClient;
 import javafx.geometry.Insets;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public class DashboardView extends VBox {
 
@@ -22,10 +26,22 @@ public class DashboardView extends VBox {
     private void loadReminders() {
         getChildren().clear();
 
+        /* ===== HEADER (TITLE + DISMISS ALL) ===== */
         Label title = new Label("🔔 Recordatorios");
         title.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-        getChildren().add(title);
 
+        Button dismissAllBtn = new Button("🔕 Dismiss all");
+        dismissAllBtn.setOnAction(e -> {
+            ApiClient.dismissAllReminders();
+            loadReminders();
+        });
+
+        HBox header = new HBox(10, title, dismissAllBtn);
+        HBox.setHgrow(title, Priority.ALWAYS);
+
+        getChildren().add(header);
+
+        /* ===== REMINDERS LIST ===== */
         try {
             String response = ApiClient.get("/reminders/dashboard");
             JSONArray reminders = new JSONArray(response);
@@ -41,7 +57,7 @@ public class DashboardView extends VBox {
                 JSONObject r = reminders.getJSONObject(i);
 
                 ReminderBanner banner = new ReminderBanner(
-                        java.util.UUID.fromString(r.getString("id")),
+                        UUID.fromString(r.getString("id")),
                         r.getString("vehicleLabel"),
                         r.getString("type"),
                         LocalDate.parse(r.getString("remindAt")),
