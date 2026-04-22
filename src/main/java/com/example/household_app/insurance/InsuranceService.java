@@ -16,14 +16,14 @@ public class InsuranceService {
 
     private final InsuranceRepository insuranceRepository;
     private final VehicleService vehicleService;
+    private final InsuranceReminderService insuranceReminderService;
 
-    public InsuranceDto createPolicy(
-            UUID vehicleId,
-            CreateInsuranceRequest request
-    ) {
+    public InsuranceDto createPolicy(UUID vehicleId, CreateInsuranceRequest request) {
+
         Vehicle vehicle = vehicleService.getByIdAndAuthorize(vehicleId);
 
         InsurancePolicy policy = new InsurancePolicy();
+        policy.setId(null); // safety
         policy.setVehicle(vehicle);
         policy.setProvider(request.provider());
         policy.setPolicyNumber(request.policyNumber());
@@ -32,8 +32,13 @@ public class InsuranceService {
         policy.setPremium(request.premium());
         policy.setPeriodicity(request.periodicity());
 
+        // 1️⃣ Policy record
         InsurancePolicy saved = insuranceRepository.save(policy);
 
+        // 2️⃣ Insurance reminder create
+        insuranceReminderService.createReminderForPolicy(saved);
+
+        // 3️⃣ Response
         return toDto(saved);
     }
 

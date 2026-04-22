@@ -44,4 +44,33 @@ public class InsuranceReminderService {
             }
         });
     }
+
+    public void createReminderForPolicy(InsurancePolicy policy) {
+
+        LocalDate remindAt = policy.getEndDate().minusDays(30);
+
+        // if date passed do not create
+        if (remindAt.isBefore(LocalDate.now())) {
+            return;
+        }
+
+        boolean exists =
+                reminderRepository.existsByVehicleAndTypeAndRemindAt(
+                        policy.getVehicle(),
+                        ReminderType.INSURANCE,
+                        remindAt
+                );
+
+        if (exists) {
+            return;
+        }
+
+        Reminder reminder = new Reminder();
+        reminder.setVehicle(policy.getVehicle());
+        reminder.setType(ReminderType.INSURANCE);
+        reminder.setRemindAt(remindAt);
+        reminder.setSent(false);
+
+        reminderRepository.save(reminder);
+    }
 }
