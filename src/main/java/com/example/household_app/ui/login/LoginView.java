@@ -56,13 +56,11 @@ public class LoginView extends VBox {
             String loginResponse = ApiClient.post("/auth/login", body);
             JSONObject loginJson = new JSONObject(loginResponse);
 
-            // ✅ JWT
             SessionStore.setJwt(loginJson.getString("accessToken"));
 
             // ===== GET HOUSEHOLDS =====
             String householdsResponse = ApiClient.get("/households");
 
-// ✅ RESPONSE ARRAY
             JSONArray households = new JSONArray(householdsResponse);
 
             if (households.isEmpty()) {

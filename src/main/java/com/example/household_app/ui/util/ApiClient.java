@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.UUID;
 
 public final class ApiClient {
 
@@ -117,5 +118,17 @@ public final class ApiClient {
 
         return response.body();
     }
+
+    public static void dismissReminder(UUID reminderId) {
+        try {
+            post("/reminders/" + reminderId + "/dismiss", "");
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Failed to dismiss reminder " + reminderId,
+                    e
+            );
+        }
+    }
+
 
 }
