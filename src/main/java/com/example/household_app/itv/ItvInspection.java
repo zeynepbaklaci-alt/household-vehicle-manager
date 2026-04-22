@@ -24,16 +24,16 @@ public class ItvInspection {
     private Vehicle vehicle;
 
     @Column(nullable = false)
-    private LocalDate date;        // ITV yapıldığı gün
+    private LocalDate date;
 
     @Column(nullable = false)
-    private LocalDate validUntil;  // bir sonraki muayeneye kadar
+    private LocalDate validUntil;
 
     @Column(nullable = false)
     private double cost;
 
     @Column(nullable = false)
-    private boolean passed;        // geçti/kaldı
+    private boolean passed;
 
     private String note;
 }

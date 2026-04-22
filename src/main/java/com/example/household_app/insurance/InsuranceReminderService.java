@@ -1,40 +1,41 @@
-package com.example.household_app.itv;
+package com.example.household_app.insurance;
 
 import com.example.household_app.reminder.Reminder;
 import com.example.household_app.reminder.ReminderRepository;
 import com.example.household_app.reminder.ReminderType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
-public class ItvReminderService {
+public class InsuranceReminderService {
 
-    private final ItvInspectionRepository itvInspectionRepository;
+    private final InsuranceRepository insuranceRepository;
     private final ReminderRepository reminderRepository;
 
-    public void createUpcomingItvReminders() {
+    public void createUpcomingInsuranceReminders() {
+
         LocalDate today = LocalDate.now();
 
-        itvInspectionRepository.findAll().forEach(itv -> {
-            LocalDate remindAt = itv.getValidUntil().minusDays(30);
+        insuranceRepository.findAll().forEach(policy -> {
+
+            LocalDate remindAt = policy.getEndDate().minusDays(30);
 
             if (remindAt.isEqual(today)) {
 
                 boolean exists =
                         reminderRepository.existsByVehicleAndTypeAndRemindAt(
-                                itv.getVehicle(),
-                                ReminderType.ITV,
+                                policy.getVehicle(),
+                                ReminderType.INSURANCE,
                                 remindAt
                         );
 
                 if (!exists) {
                     Reminder reminder = new Reminder();
-                    reminder.setVehicle(itv.getVehicle());
-                    reminder.setType(ReminderType.ITV);
+                    reminder.setVehicle(policy.getVehicle());
+                    reminder.setType(ReminderType.INSURANCE);
                     reminder.setRemindAt(remindAt);
                     reminder.setSent(false);
 

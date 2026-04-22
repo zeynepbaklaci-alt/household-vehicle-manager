@@ -40,7 +40,7 @@ public class InsurancePolicy {
     private LocalDate endDate;
 
     @Column(nullable = false)
-    private double premium;  // toplam tutar
+    private double premium;  // total amount
 
     @Column(nullable = false)
     private String periodicity; // ANNUAL, MONTHLY, QUARTERLY
