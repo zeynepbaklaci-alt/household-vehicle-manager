@@ -43,18 +43,17 @@ public class DashboardView extends VBox {
 
         /* ===== REMINDERS LIST ===== */
         try {
-            String response = ApiClient.get("/reminders/dashboard");
-            JSONArray reminders = new JSONArray(response);
+            JSONArray arr = ApiClient.getCachedReminders();
 
-            if (reminders.isEmpty()) {
+            if (arr.isEmpty()) {
                 Label empty = new Label("No hay avisos pendientes");
                 empty.setStyle("-fx-text-fill: gray;");
                 getChildren().add(empty);
                 return;
             }
 
-            for (int i = 0; i < reminders.length(); i++) {
-                JSONObject r = reminders.getJSONObject(i);
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject r = arr.getJSONObject(i);
 
                 ReminderBanner banner = new ReminderBanner(
                         UUID.fromString(r.getString("id")),

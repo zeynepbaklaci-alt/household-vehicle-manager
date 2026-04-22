@@ -1,6 +1,7 @@
 package com.example.household_app.ui.util;
 
 import com.example.household_app.ui.session.SessionStore;
+import org.json.JSONArray;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -13,7 +14,10 @@ public final class ApiClient {
     private static final String BASE_URL = "http://localhost:8080/api";
     private static final HttpClient CLIENT = HttpClient.newHttpClient();
 
-    private ApiClient() {}
+    private static JSONArray reminderCache;
+
+    private ApiClient() {
+    }
 
     private static HttpRequest.Builder baseRequest(String path) {
         HttpRequest.Builder builder = HttpRequest.newBuilder()
@@ -122,6 +126,7 @@ public final class ApiClient {
     public static void dismissReminder(UUID reminderId) {
         try {
             post("/reminders/" + reminderId + "/dismiss", "");
+            reminderCache = null;
         } catch (Exception e) {
             throw new RuntimeException(
                     "Failed to dismiss reminder " + reminderId,
@@ -133,8 +138,21 @@ public final class ApiClient {
     public static void dismissAllReminders() {
         try {
             post("/reminders/dismiss-all", "");
+            reminderCache = null;
         } catch (Exception e) {
             throw new RuntimeException("Failed to dismiss all reminders", e);
+        }
+    }
+
+    public static JSONArray getCachedReminders() {
+        try {
+            if (reminderCache == null) {
+                reminderCache =
+                        new JSONArray(get("/reminders/dashboard"));
+            }
+            return reminderCache;
+        } catch (Exception e) {
+            return new JSONArray();
         }
     }
 
