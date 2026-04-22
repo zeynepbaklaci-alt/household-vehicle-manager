@@ -43,4 +43,33 @@ public class ItvReminderService {
             }
         });
     }
+
+    public void createReminderForInspection(ItvInspection itv) {
+
+        LocalDate remindAt = itv.getValidUntil().minusDays(30);
+
+        // checking date
+        if (remindAt.isBefore(LocalDate.now())) {
+            return;
+        }
+
+        boolean exists =
+                reminderRepository.existsByVehicleAndTypeAndRemindAt(
+                        itv.getVehicle(),
+                        ReminderType.ITV,
+                        remindAt
+                );
+
+        if (exists) {
+            return;
+        }
+
+        Reminder reminder = new Reminder();
+        reminder.setVehicle(itv.getVehicle());
+        reminder.setType(ReminderType.ITV);
+        reminder.setRemindAt(remindAt);
+        reminder.setSent(false);
+
+        reminderRepository.save(reminder);
+    }
 }

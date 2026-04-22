@@ -14,6 +14,7 @@ public class ItvInspectionService {
 
     private final ItvInspectionRepository repository;
     private final VehicleService vehicleService;
+    private final ItvReminderService itvReminderService;
 
     public ItvInspection create(
             UUID vehicleId,
@@ -25,8 +26,16 @@ public class ItvInspectionService {
         inspection.setId(null);        // safety
         inspection.setVehicle(vehicle);
 
-        return repository.save(inspection);
+        // 1️⃣ ITV record
+        ItvInspection saved = repository.save(inspection);
+
+        // 2️⃣ Reminder create for itv
+        itvReminderService.createReminderForInspection(saved);
+
+        // 3️⃣ Bring recorded itv
+        return saved;
     }
+
 
     public List<ItvInspection> listByVehicle(UUID vehicleId) {
         Vehicle vehicle =
