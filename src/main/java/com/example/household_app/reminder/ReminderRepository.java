@@ -17,4 +17,6 @@ public interface ReminderRepository extends JpaRepository<Reminder, UUID> {
     );
 
     List<Reminder> findBySentFalseAndRemindAtLessThanEqual(LocalDate date);
+
+    List<Reminder> findByVehicleOrderByRemindAtDesc(Vehicle vehicle);
 }

@@ -1,6 +1,8 @@
 package com.example.household_app.reminder;
 
 import com.example.household_app.reminder.dto.ReminderResponseDTO;
+import com.example.household_app.vehicle.Vehicle;
+import com.example.household_app.vehicle.VehicleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +17,7 @@ import java.util.UUID;
 public class ReminderController {
 
     private final ReminderRepository reminderRepository;
+    private final VehicleService vehicleService;
 
     @GetMapping("/dashboard")
     public List<ReminderResponseDTO> dashboardReminders() {
@@ -34,6 +37,24 @@ public class ReminderController {
                 .toList();
     }
 
+    @GetMapping("/vehicles/{vehicleId}/history")
+    public List<ReminderResponseDTO> history(
+            @PathVariable UUID vehicleId
+    ) {
+        Vehicle vehicle = vehicleService.getByIdAndAuthorize(vehicleId);
+
+        return reminderRepository
+                .findByVehicleOrderByRemindAtDesc(vehicle)
+                .stream()
+                .map(r -> new ReminderResponseDTO(
+                        r.getId(),
+                        r.getVehicle().getId(),
+                        r.getVehicle().getPlate(),
+                        r.getType().name(),
+                        r.getRemindAt()
+                ))
+                .toList();
+    }
 
     @PostMapping("/{id}/dismiss")
     public void dismiss(@PathVariable UUID id) {

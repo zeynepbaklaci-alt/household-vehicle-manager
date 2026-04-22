@@ -36,11 +36,11 @@ public class VehicleDetailView extends VBox {
 
         Label reminderBadge = new Label();
         reminderBadge.setStyle("""
-            -fx-background-color: #ff4444;
-            -fx-text-fill: white;
-            -fx-padding: 4 8;
-            -fx-background-radius: 10;
-        """);
+                    -fx-background-color: #ff4444;
+                    -fx-text-fill: white;
+                    -fx-padding: 4 8;
+                    -fx-background-radius: 10;
+                """);
         reminderBadge.setVisible(false);
 
         HBox headerBox = new HBox(10, title, reminderBadge);
@@ -177,8 +177,12 @@ public class VehicleDetailView extends VBox {
         Tab reportsTab = new Tab("Reports", createReportsTab());
         reportsTab.setClosable(false);
 
+        //---- REMINDER TAB ---
+        Tab reminderTab = new Tab("Reminders", createReminderHistoryTab());
+        reminderTab.setClosable(false);
+
         /* ===== TAB PANE ===== */
-        TabPane tabs = new TabPane(detailsTab, fuelTab, reportsTab);
+        TabPane tabs = new TabPane(detailsTab, fuelTab, reportsTab, reminderTab);
 
         getChildren().addAll(headerBox, tabs);
     }
@@ -248,6 +252,36 @@ public class VehicleDetailView extends VBox {
                 consumptionLabel
         );
 
+        return box;
+    }
+
+    private VBox createReminderHistoryTab() {
+        VBox box = new VBox(10);
+        box.setPadding(new Insets(10));
+
+        ListView<String> list = new ListView<>();
+
+        try {
+            String resp = ApiClient.get(
+                    "/vehicles/" + vehicle.getId() + "/reminders/history"
+            );
+
+            JSONArray arr = new JSONArray(resp);
+
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject r = arr.getJSONObject(i);
+                list.getItems().add(
+                        r.getString("type") +
+                                " – " +
+                                r.getString("remindAt")
+                );
+            }
+
+        } catch (Exception e) {
+            list.setPlaceholder(new Label("No reminders"));
+        }
+
+        box.getChildren().add(list);
         return box;
     }
 
