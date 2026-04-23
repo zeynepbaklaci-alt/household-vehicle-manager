@@ -92,6 +92,17 @@ public class AddVehicleView {
 
         /* ===== SAVE ===== */
         saveBtn.setOnAction(e -> {
+
+            if (plateField.getText().isBlank()
+                    || brandField.getText().isBlank()
+                    || modelField.getText().isBlank()
+                    || odometerField.getText().isBlank()
+                    || fuelTypeBox.getValue() == null) {
+
+                showError("All fields must be filled");
+                return;
+            }
+
             try {
                 JSONObject body = new JSONObject();
                 body.put("plate", plateField.getText().trim());
@@ -164,5 +175,11 @@ public class AddVehicleView {
 
         stage.setScene(new Scene(grid));
         stage.showAndWait();
+    }
+    private static void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

@@ -361,9 +361,10 @@ public class VehicleDetailView extends VBox {
             }
 
             if (arr.isEmpty()) {
-                listView.setPlaceholder(
-                        new Label("No insurance policies")
-                );
+                Label empty = new Label("No insurance policies yet");
+                empty.setStyle("-fx-text-fill: gray; -fx-font-style: italic;");
+                listView.setPlaceholder(empty);
+
             }
 
         } catch (Exception e) {
@@ -421,6 +422,14 @@ public class VehicleDetailView extends VBox {
 
         dialog.setResultConverter(button -> {
             if (button == saveButtonType) {
+                if (providerField.getText().isBlank()
+                        || policyNumberField.getText().isBlank()
+                        || startDatePicker.getValue() == null
+                        || endDatePicker.getValue() == null
+                        || premiumField.getText().isBlank()) {
+                    showError("All fields must be filled");
+                    return null;
+                }
                 try {
                     JSONObject body = new JSONObject();
                     body.put("provider", providerField.getText());
@@ -435,8 +444,12 @@ public class VehicleDetailView extends VBox {
                             body.toString()
                     );
 
-                    // ✅ refresh insurance tab
                     refreshInsuranceTab();
+
+                    Alert info = new Alert(Alert.AlertType.INFORMATION);
+                    info.setHeaderText(null);
+                    info.setContentText("Insurance saved successfully");
+                    info.showAndWait();
 
                 } catch (Exception ex) {
                     showError("Failed to save insurance");
@@ -488,9 +501,9 @@ public class VehicleDetailView extends VBox {
             }
 
             if (arr.isEmpty()) {
-                listView.setPlaceholder(
-                        new Label("No ITV records")
-                );
+                Label empty = new Label("No insurance policies yet");
+                empty.setStyle("-fx-text-fill: gray; -fx-font-style: italic;");
+                listView.setPlaceholder(empty);
             }
 
         } catch (Exception e) {
@@ -539,6 +552,19 @@ public class VehicleDetailView extends VBox {
 
         dialog.setResultConverter(button -> {
             if (button == saveButtonType) {
+                if (datePicker.getValue() == null
+                        || validUntilPicker.getValue() == null
+                        || costField.getText().isBlank()) {
+
+                    showError("All required fields must be filled");
+                    return null;
+                }
+
+                if (validUntilPicker.getValue().isBefore(datePicker.getValue())) {
+                    showError("Valid until must be after inspection date");
+                    return null;
+                }
+
                 try {
                     JSONObject body = new JSONObject();
                     body.put("date", datePicker.getValue().toString());
@@ -551,9 +577,12 @@ public class VehicleDetailView extends VBox {
                             "/vehicles/" + vehicle.getId() + "/itv",
                             body.toString()
                     );
-
-                    // ✅ refresh ITV tab
                     refreshItvTab();
+
+                    Alert info = new Alert(Alert.AlertType.INFORMATION);
+                    info.setHeaderText(null);
+                    info.setContentText("ITV saved successfully");
+                    info.showAndWait();
 
                 } catch (Exception ex) {
                     showError("Failed to save ITV");
