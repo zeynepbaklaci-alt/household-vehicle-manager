@@ -105,6 +105,27 @@ Frontend y backend desarrollados completamente por la autora.
 
 ---
 
+## Application Screenshots
+
+### Vehicle List
+screenshots/vehicle-list.png
+
+### Vehicle Detail View
+screenshots/vehicle-detail.png
+
+### Fuel Management
+screenshots/fuel-tab.png
+
+### Insurance Management
+screenshots/insurance-tab.png
+
+### ITV Management
+screenshots/itv-tab.png
+
+### Reminder Dashboard
+screenshots/reminder-dashboard.png
+---
+
 ## Autora
 
 **Zeynep BAKLACI**  

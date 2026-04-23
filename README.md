@@ -133,6 +133,27 @@ Both frontend and backend were fully designed and implemented by the author.
 
 ---
 
+## Application Screenshots
+
+### Vehicle List
+screenshots/vehicle-list.png
+
+### Vehicle Detail View
+screenshots/vehicle-detail.png
+
+### Fuel Management
+screenshots/fuel-tab.png
+
+### Insurance Management
+screenshots/insurance-tab.png
+
+### ITV Management
+screenshots/itv-tab.png
+
+### Reminder Dashboard
+screenshots/reminder-dashboard.png
+---
+
 ## Author
 ZEYNEP BAKLACI  
 Product Software Engineer – Barcelona
