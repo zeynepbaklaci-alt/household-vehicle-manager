@@ -8,6 +8,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 public final class ApiClient {
 
@@ -25,12 +26,9 @@ public final class ApiClient {
                 .header("Content-Type", "application/json");
 
         String jwt = SessionStore.getJwt();
-        System.out.println("JWT in session: " + SessionStore.getJwt());
 
         if (jwt != null && !jwt.isBlank()) {
             builder.header("Authorization", "Bearer " + jwt);
-        } else {
-            System.out.println("⚠️ No JWT for request: " + path);
         }
 
         return builder;
@@ -74,18 +72,21 @@ public final class ApiClient {
         return response.body();
     }
 
+    private static final Logger LOGGER =
+            Logger.getLogger(ApiClient.class.getName());
+
     private static void logResponse(
             String method,
             String path,
             HttpResponse<String> response
     ) {
-        System.out.println("========== API CALL ==========");
-        System.out.println(method + " " + path);
-        System.out.println("Status: " + response.statusCode());
-        System.out.println("Body:");
-        System.out.println(response.body());
-        System.out.println("================================");
+        LOGGER.fine(() ->
+                method + " " + path +
+                        " → " + response.statusCode() +
+                        "\n" + response.body()
+        );
     }
+
 
     public static void delete(String path) throws Exception {
         HttpRequest request = baseRequest(path)

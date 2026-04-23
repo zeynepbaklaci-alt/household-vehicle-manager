@@ -16,7 +16,6 @@ public class VehicleController {
 
     @GetMapping
     public List<VehicleDto> list(@PathVariable UUID householdId) {
-        System.out.println("✅ VehicleController reached");
 
         return vehicleService.getVehicle(householdId)
                 .stream()
@@ -74,7 +73,6 @@ public class VehicleController {
     ) {
         vehicleService.deleteVehicle(householdId, vehicleId);
     }
-
 
 
 }

@@ -26,8 +26,6 @@ public class HouseholdController {
         List<UUID> householdIds =
                 membershipRepository.findAllHouseholdIdsByUserId(userId);
 
-        System.out.println("✅ HouseholdController reached");
-
         return householdRepository.findAllById(householdIds)
                 .stream()
                 .map(h -> new HouseholdDto(

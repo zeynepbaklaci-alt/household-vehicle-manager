@@ -44,11 +44,11 @@ public class LoginView extends VBox {
         try {
             /* ===== LOGIN ===== */
             String body = """
-                {
-                  "email": "%s",
-                  "password": "%s"
-                }
-            """.formatted(
+                        {
+                          "email": "%s",
+                          "password": "%s"
+                        }
+                    """.formatted(
                     emailField.getText().trim(),
                     passwordField.getText()
             );
@@ -72,9 +72,8 @@ public class LoginView extends VBox {
                     households.getJSONObject(0).getString("id");
 
             SessionStore.setHouseholdId(householdId);
-            System.out.println("✅ UI householdId set to: " + householdId);
 
-// ===== GO TO VEHICLE LIST =====
+            //  GO TO VEHICLE LIST =====
             stage.setScene(
                     new Scene(
                             new VehicleListView(stage),

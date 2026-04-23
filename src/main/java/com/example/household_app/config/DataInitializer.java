@@ -41,8 +41,6 @@ public class DataInitializer {
                         return userRepository.save(u);
                     });
 
-            System.out.println("✅ Test user ready");
-
             /* ===== HOUSEHOLD ===== */
 
             Household household = householdRepository.findAll()
@@ -54,14 +52,9 @@ public class DataInitializer {
                         return householdRepository.save(h);
                     });
 
-            System.out.println("✅ Household ready");
-
             long vehicleCount = vehicleRepository.count();
-            System.out.println("VEHICLE COUNT = " + vehicleCount);
 
-            /* ===== VEHICLES ===== */
-
-            if (vehicleRepository.count() == 0) {
+            if (vehicleCount == 0) {
 
                 Vehicle corolla = new Vehicle();
                 corolla.setHousehold(household);
@@ -90,9 +83,6 @@ public class DataInitializer {
                 vehicleRepository.save(corolla);
                 vehicleRepository.save(ibiza);
                 vehicleRepository.save(mt07);
-
-                System.out.println("✅ Demo vehicles created");
-                System.out.println("HOUSEHOLD ID = " + household.getId());
 
             }
         };

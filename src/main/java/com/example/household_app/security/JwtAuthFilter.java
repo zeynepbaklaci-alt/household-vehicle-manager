@@ -64,7 +64,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         .getContext()
                         .setAuthentication(authentication);
 
-                System.out.println("✅ JWT authenticated: " + email);
             }
         }
 
