@@ -6,6 +6,7 @@ import com.example.household_app.ui.vehicle.fuel.FuelDto;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -19,6 +20,8 @@ public class VehicleDetailView extends VBox {
 
     private final Stage stage;
     private final VehicleDto vehicle;
+    private Tab insuranceTab;
+    private Tab itvTab;
 
     private static final Logger LOGGER =
             Logger.getLogger(VehicleDetailView.class.getName());
@@ -181,8 +184,23 @@ public class VehicleDetailView extends VBox {
         Tab reminderTab = new Tab("Reminders", createReminderHistoryTab());
         reminderTab.setClosable(false);
 
-        /* ===== TAB PANE ===== */
-        TabPane tabs = new TabPane(detailsTab, fuelTab, reportsTab, reminderTab);
+
+        insuranceTab = new Tab("Insurance");
+        insuranceTab.setContent(createInsuranceTab());
+        insuranceTab.setClosable(false);
+
+        itvTab = new Tab("ITV");
+        itvTab.setContent(createItvTab());
+        itvTab.setClosable(false);
+
+        TabPane tabs = new TabPane(
+                detailsTab,
+                fuelTab,
+                reportsTab,
+                reminderTab,
+                insuranceTab,
+                itvTab
+        );
 
         getChildren().addAll(headerBox, tabs);
     }
@@ -312,4 +330,242 @@ public class VehicleDetailView extends VBox {
             badge.setVisible(false);
         }
     }
+
+    private VBox createInsuranceTab() {
+        VBox root = new VBox(10);
+        root.setPadding(new Insets(10));
+
+        // ✅ Add button
+        Button addButton = new Button("Add Insurance");
+        addButton.setOnAction(e -> openAddInsuranceDialog());
+
+        ListView<String> listView = new ListView<>();
+
+        try {
+            String response = ApiClient.get(
+                    "/vehicles/" + vehicle.getId() + "/insurance-policies"
+            );
+
+            JSONArray arr = new JSONArray(response);
+
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject p = arr.getJSONObject(i);
+
+                String line =
+                        p.getString("provider") + " | " +
+                                p.getString("policyNumber") + " | " +
+                                p.getString("startDate") + " → " +
+                                p.getString("endDate");
+
+                listView.getItems().add(line);
+            }
+
+            if (arr.isEmpty()) {
+                listView.setPlaceholder(
+                        new Label("No insurance policies")
+                );
+            }
+
+        } catch (Exception e) {
+            listView.setPlaceholder(
+                    new Label("Error loading insurance policies")
+            );
+        }
+
+        root.getChildren().addAll(addButton, listView);
+        return root;
+    }
+
+
+    private void openAddInsuranceDialog() {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Add Insurance");
+
+        // Fields
+        TextField providerField = new TextField();
+        providerField.setPromptText("Provider");
+
+        TextField policyNumberField = new TextField();
+        policyNumberField.setPromptText("Policy number");
+
+        DatePicker startDatePicker = new DatePicker();
+        DatePicker endDatePicker = new DatePicker();
+
+        TextField premiumField = new TextField();
+        premiumField.setPromptText("Premium");
+
+        ComboBox<String> periodicityBox = new ComboBox<>();
+        periodicityBox.getItems().addAll("ANNUAL", "MONTHLY", "QUARTERLY");
+        periodicityBox.setValue("ANNUAL");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        grid.addRow(0, new Label("Provider:"), providerField);
+        grid.addRow(1, new Label("Policy Number:"), policyNumberField);
+        grid.addRow(2, new Label("Start Date:"), startDatePicker);
+        grid.addRow(3, new Label("End Date:"), endDatePicker);
+        grid.addRow(4, new Label("Premium:"), premiumField);
+        grid.addRow(5, new Label("Periodicity:"), periodicityBox);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // Buttons
+        ButtonType saveButtonType =
+                new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(
+                saveButtonType,
+                ButtonType.CANCEL
+        );
+
+        dialog.setResultConverter(button -> {
+            if (button == saveButtonType) {
+                try {
+                    JSONObject body = new JSONObject();
+                    body.put("provider", providerField.getText());
+                    body.put("policyNumber", policyNumberField.getText());
+                    body.put("startDate", startDatePicker.getValue().toString());
+                    body.put("endDate", endDatePicker.getValue().toString());
+                    body.put("premium", Double.parseDouble(premiumField.getText()));
+                    body.put("periodicity", periodicityBox.getValue());
+
+                    ApiClient.post(
+                            "/vehicles/" + vehicle.getId() + "/insurance-policies",
+                            body.toString()
+                    );
+
+                    // ✅ refresh insurance tab
+                    refreshInsuranceTab();
+
+                } catch (Exception ex) {
+                    showError("Failed to save insurance");
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait();
+    }
+
+    private void refreshInsuranceTab() {
+        insuranceTab.setContent(createInsuranceTab());
+    }
+
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private VBox createItvTab() {
+        VBox root = new VBox(10);
+        root.setPadding(new Insets(10));
+
+        // ✅ Add button
+        Button addButton = new Button("Add ITV");
+        addButton.setOnAction(e -> openAddItvDialog());
+
+        ListView<String> listView = new ListView<>();
+
+        try {
+            String response = ApiClient.get(
+                    "/vehicles/" + vehicle.getId() + "/itv"
+            );
+
+            JSONArray arr = new JSONArray(response);
+
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject itv = arr.getJSONObject(i);
+
+                String line =
+                        "Valid until: " + itv.getString("validUntil") +
+                                " | Passed: " + itv.getBoolean("passed") +
+                                " | Cost: " + itv.getDouble("cost");
+
+                listView.getItems().add(line);
+            }
+
+            if (arr.isEmpty()) {
+                listView.setPlaceholder(
+                        new Label("No ITV records")
+                );
+            }
+
+        } catch (Exception e) {
+            listView.setPlaceholder(
+                    new Label("Error loading ITV records")
+            );
+        }
+
+        root.getChildren().addAll(addButton, listView);
+        return root;
+    }
+    private void openAddItvDialog() {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Add ITV");
+
+        DatePicker datePicker = new DatePicker();
+        DatePicker validUntilPicker = new DatePicker();
+
+        TextField costField = new TextField();
+        costField.setPromptText("Cost");
+
+        CheckBox passedCheck = new CheckBox("Passed");
+
+        TextField noteField = new TextField();
+        noteField.setPromptText("Note (optional)");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        grid.addRow(0, new Label("Date:"), datePicker);
+        grid.addRow(1, new Label("Valid Until:"), validUntilPicker);
+        grid.addRow(2, new Label("Cost:"), costField);
+        grid.addRow(3, new Label("Result:"), passedCheck);
+        grid.addRow(4, new Label("Note:"), noteField);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType saveButtonType =
+                new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+
+        dialog.getDialogPane().getButtonTypes().addAll(
+                saveButtonType,
+                ButtonType.CANCEL
+        );
+
+        dialog.setResultConverter(button -> {
+            if (button == saveButtonType) {
+                try {
+                    JSONObject body = new JSONObject();
+                    body.put("date", datePicker.getValue().toString());
+                    body.put("validUntil", validUntilPicker.getValue().toString());
+                    body.put("cost", Double.parseDouble(costField.getText()));
+                    body.put("passed", passedCheck.isSelected());
+                    body.put("note", noteField.getText());
+
+                    ApiClient.post(
+                            "/vehicles/" + vehicle.getId() + "/itv",
+                            body.toString()
+                    );
+
+                    // ✅ refresh ITV tab
+                    refreshItvTab();
+
+                } catch (Exception ex) {
+                    showError("Failed to save ITV");
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait();
+    }
+    private void refreshItvTab() {
+        itvTab.setContent(createItvTab());
+    }
+
 }
