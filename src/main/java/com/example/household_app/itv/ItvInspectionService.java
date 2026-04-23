@@ -20,6 +20,7 @@ public class ItvInspectionService {
             UUID vehicleId,
             ItvInspection inspection
     ) {
+
         Vehicle vehicle =
                 vehicleService.getByIdAndAuthorize(vehicleId);
 

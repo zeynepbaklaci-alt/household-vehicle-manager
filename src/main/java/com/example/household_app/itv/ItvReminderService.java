@@ -4,7 +4,6 @@ import com.example.household_app.reminder.Reminder;
 import com.example.household_app.reminder.ReminderRepository;
 import com.example.household_app.reminder.ReminderType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -44,18 +43,15 @@ public class ItvReminderService {
         });
     }
 
-    public void createReminderForInspection(ItvInspection itv) {
 
-        LocalDate remindAt = itv.getValidUntil().minusDays(30);
 
-        // checking date
-        if (remindAt.isBefore(LocalDate.now())) {
-            return;
-        }
+    public void createReminderForInspection(ItvInspection inspection) {
+
+        LocalDate remindAt = inspection.getValidUntil().minusDays(30);
 
         boolean exists =
                 reminderRepository.existsByVehicleAndTypeAndRemindAt(
-                        itv.getVehicle(),
+                        inspection.getVehicle(),
                         ReminderType.ITV,
                         remindAt
                 );
@@ -65,10 +61,11 @@ public class ItvReminderService {
         }
 
         Reminder reminder = new Reminder();
-        reminder.setVehicle(itv.getVehicle());
+        reminder.setVehicle(inspection.getVehicle());
         reminder.setType(ReminderType.ITV);
         reminder.setRemindAt(remindAt);
         reminder.setSent(false);
+        reminder.setSentAt(null);
 
         reminderRepository.save(reminder);
     }
