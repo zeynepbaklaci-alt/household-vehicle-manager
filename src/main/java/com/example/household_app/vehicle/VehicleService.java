@@ -4,8 +4,8 @@ import com.example.household_app.household.Household;
 import com.example.household_app.membership.MembershipRepository;
 import com.example.household_app.user.CurrentUserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,20 +19,22 @@ public class VehicleService {
     private final MembershipRepository membershipRepository;
     private final CurrentUserService currentUserService;
 
+    /**
+     * ✅ List vehicles for a household (member only)
+     */
     public List<Vehicle> getVehicle(UUID householdId) {
-
         UUID currentUserId = currentUserService.getCurrentUserId();
 
-        boolean isMember =
-                membershipRepository.isMember(householdId, currentUserId);
-
-        if (!isMember) {
+        if (!membershipRepository.isMember(householdId, currentUserId)) {
             throw new AccessDeniedException("No access to household");
         }
 
         return vehicleRepository.findAllByHouseholdId(householdId);
     }
 
+    /**
+     * ✅ Create vehicle (member only)
+     */
     public Vehicle createVehicle(
             UUID householdId,
             String plate,
@@ -41,13 +43,9 @@ public class VehicleService {
             FuelType fuelType,
             Integer initialOdometer
     ) {
-
         UUID currentUserId = currentUserService.getCurrentUserId();
 
-        boolean isMember =
-                membershipRepository.isMember(householdId, currentUserId);
-
-        if (!isMember) {
+        if (!membershipRepository.isMember(householdId, currentUserId)) {
             throw new AccessDeniedException("No access to household");
         }
 
@@ -66,39 +64,17 @@ public class VehicleService {
     }
 
     /**
-     * 🔍 Vehicle fetch + authorization
-
-    public Vehicle getVehicleById(UUID vehicleId) {
-
-        UUID currentUserId = currentUserService.getCurrentUserId();
-
-        return membershipRepository.findAllHouseholdIdsByUserId(currentUserId)
-                .stream()
-                .map(householdId ->
-                        vehicleRepository
-                                .findByIdAndHouseholdId(vehicleId, householdId)
-                )
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .findFirst()
-                .orElseThrow(() ->
-                        new AccessDeniedException("No access to this vehicle")
-                );
-    }
+     * ✅ Fetch vehicle ONLY if current user is member of its household
+     * Used by Insurance, ITV, Fuel, etc.
      */
-
-    public Vehicle getVehicleById(UUID vehicleId) {
-
+    public Vehicle getByIdAndAuthorize(UUID vehicleId) {
         UUID currentUserId = currentUserService.getCurrentUserId();
-        System.out.println("DEBUG userId=" + currentUserId);
 
         return membershipRepository.findAllHouseholdIdsByUserId(currentUserId)
                 .stream()
-                .peek(hid -> System.out.println("DEBUG householdId=" + hid))
                 .map(householdId ->
                         vehicleRepository.findByIdAndHouseholdId(vehicleId, householdId)
                 )
-                .peek(v -> System.out.println("DEBUG find result=" + v))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst()
@@ -107,13 +83,8 @@ public class VehicleService {
                 );
     }
 
-    public Vehicle getByIdAndAuthorize(UUID vehicleId) {
-        return getVehicleById(vehicleId);
-    }
-
     /**
-     * ✏️ UPDATE Vehicle (Edit)
-     * Plate intentionally NOT editable
+     * ✅ Update vehicle (member only)
      */
     public Vehicle updateVehicle(
             UUID householdId,
@@ -123,7 +94,6 @@ public class VehicleService {
             FuelType fuelType,
             Integer initialOdometer
     ) {
-
         UUID currentUserId = currentUserService.getCurrentUserId();
 
         if (!membershipRepository.isMember(householdId, currentUserId)) {
@@ -143,16 +113,11 @@ public class VehicleService {
 
         return vehicleRepository.save(vehicle);
     }
-    /**
-     * 🗑 DELETE Vehicle
 
-    public void deleteVehicle(UUID vehicleId) {
-        Vehicle vehicle = getByIdAndAuthorize(vehicleId);
-        vehicleRepository.delete(vehicle);
-    }
+    /**
+     * ✅ Delete vehicle (member only)
      */
     public void deleteVehicle(UUID householdId, UUID vehicleId) {
-
         UUID currentUserId = currentUserService.getCurrentUserId();
 
         if (!membershipRepository.isMember(householdId, currentUserId)) {

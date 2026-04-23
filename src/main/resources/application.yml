@@ -18,3 +18,7 @@ app:
   jwt:
     secret: ThisIsAReallyStrongJwtSecretKeyWithMoreThan32Chars
     expiration-minutes: 60
+
+logging:
+  level:
+    org.springframework.security: DEBUG
